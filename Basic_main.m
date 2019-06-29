@@ -3,9 +3,9 @@
 %                                                                                     %
 %  A solver for Multi-Disciplinary Optimization, based on Non-Hierarchical Analytical %
 %  Target Cascading                                                                   %
-%  Version 2.0.1                                                                      %
+%  Version 3.0.0                                                                      %
 %                                                                                     %
-%  Copyright (C) 2012-2016  Bastien Talgorn - McGill University, Montreal             %
+%  Copyright (C) 2012-2019  Bastien Talgorn - McGill University, Montreal             %
 %                                                                                     %
 %  Author: Bastien Talgorn                                                            %
 %  email: bastientalgorn@fastmail.com                                                 %
@@ -27,19 +27,29 @@
 
 close all
 clear all
-disp('======= Solving the 3 problems for McGill Class ===============');
+disp('======= Solving a basic MDO problem ===============');
+disp('See Basic_problem_definition.m for the definition of the variables.');
+disp('See Basic_subsystem_analysis.m for the subsystem analysis.');
 
 % NiHiMDO Parameters
-NoHi_options.display = false;
-NoHi_options.cache = false;
+NoHi_options.display = true;
 NoHi_options.w_scheme = 'median';
 NoHi_options.beta = 1.3;
-NoHi_options.w0 = 0.01;
+NoHi_options.w0 = 1;
 NoHi_options.inc_stop = 1e-9;
-NoHi_options.NI = 30;
-NoHi_options.NO = 200;
-
+NoHi_options.NI = 20;
+NoHi_options.NO = 50;
+NoHi_options.nb_proc = +inf;
+NoHi_options.save_subproblems = true;
+NoHi_options.solver = 'mads'
 PB = Basic_problem_definition;
-[inc,obj,x] = NoHiSolver(PB,NoHi_options);
-num2str(x')
-obj(end)
+output = NoHiSolver(PB,NoHi_options);
+
+disp("Final x value:");
+disp(output.x);
+disp("Final obj value:");
+disp(output.obj);
+
+save output.mat output PB NoHi_options
+
+

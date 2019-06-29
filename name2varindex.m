@@ -3,9 +3,9 @@
 %                                                                                     %
 %  A solver for Multi-Disciplinary Optimization, based on Non-Hierarchical Analytical %
 %  Target Cascading                                                                   %
-%  Version 2.0.1                                                                      %
+%  Version 3.0.0                                                                      %
 %                                                                                     %
-%  Copyright (C) 2012-2016  Bastien Talgorn - McGill University, Montreal             %
+%  Copyright (C) 2012-2019  Bastien Talgorn - McGill University, Montreal             %
 %                                                                                     %
 %  Author: Bastien Talgorn                                                            %
 %  email: bastientalgorn@fastmail.com                                                 %
@@ -25,23 +25,32 @@
 %  You can find information on NoHiMDO at https://github.com/bastientalgorn/NoHiMDO   %
 %-------------------------------------------------------------------------------------%
 
-function i0 = name2varindex(varname,PB)
+function varindex = name2varindex(varname,PB)
 
-for i=1:PB.NV
-    if strcmp(varname,PB.varnames{i})
-        i0 = i;
-        return;
+
+try
+    varindex = PB.name_to_index_struct.(varname);
+catch
+    % Use Levenshtein distance to find the closest var name
+    disp(varname)
+    PB
+    d = +inf*ones(PB.NV,1)
+    for i=1:PB.NV
+        d(i) = levenshtein_dist(varname,PB.var_names{i});
     end
-end
+    dmin = min(d);
+    disp(['Error: Cannot find any variable named "' varname]);
+    
+    s = ['Possible candidates: '];
+    for i=1:PB.NV
+        if d(i)==dmin
+            s = [s '"' PB.var_names{i} '", '];
+        end
+    end
+    disp( s(1:end-2) );
 
-% Use Levenshtein distance to find the closest var name
-d = +inf*ones(PB.NV,1);
-for i=1:PB.NV
-    d(i) = levenshtein_dist(varname,PB.varnames{i});
+    error(['Variable ' varname ' could not be found.']);
 end
-[dimin,i0] = min(d);
-error(['Cannot find a variable named "' varname '". Did you mean "' PB.varnames{i0} '"?']);
-
 
 %Levenshtein distance
 function d=levenshtein_dist(s1,s2)
@@ -55,7 +64,7 @@ for i=2:L2+1
     s2i=s2(i-1);
     for j=2:L1+1
         k = ~strcmp(s1(j-1),s2i);
-        d(i,j)=min([d(i-1,j-1)+k,d(i-1,j)+1,d(i,j-1)+1]);
+        d(i,j) = min( [d(i-1,j-1)+k,d(i-1,j)+1,d(i,j-1)+1] );
     end
 end
 d = d(L2+1,L1+1);

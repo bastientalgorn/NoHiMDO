@@ -23,7 +23,7 @@ switch subproblem_index
         [SFC,We,ESF] = SBJ_obj_power(h,M,T,D);
         y = [We,SFC,ESF];
         obj = 0;
-        c_ineq = SBJ_constraint_power(h,M,T,D)-ineqtol;
+        c_ineq = SBJ_constraint_power(h,M,T,D);%-ineqtol;
     case 3
         [ESF,Wt,theta,tc,ARw,LAMBDAw,Sref,Sht,ARht,LAMBDAht,Lw,Lht] = split_vector(x_DV);
         Z = [tc,h,M,ARw,LAMBDAw,Sref,Sht,ARht];

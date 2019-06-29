@@ -25,27 +25,61 @@
 %  You can find information on NoHiMDO at https://github.com/bastientalgorn/NoHiMDO   %
 %-------------------------------------------------------------------------------------%
 
-close all
-clear all
-disp('======= Solving the 3 problems for McGill Class ===============');
+function [fphi_c,y] = subproblem_analysis_overlay(PB,NoHi_options,j,x_D,x,v,w,delta_q)
 
-% NiHiMDO Parameters
-NoHi_options.display = true;
-NoHi_options.cache = false;
-NoHi_options.w_scheme = 'median';
-NoHi_options.beta = 1.5;
-NoHi_options.NI = 30;
-NoHi_options.NO = 30;
-NoHi_options.save_subproblems = true;
+% Returns a vector fphi_c such that 
+%    - 1st component is the objective value + penalty value
+%    - next components are constraints values
+% and a vector y containing the coupling value.
 
-PB = McGillClass_problem_definition(1);
-output = NoHiSolver(PB,NoHi_options);
-output
+% Sets of indexes:
+D = PB.D_indexes{j};
+C = PB.C_indexes{j};
+lb = PB.lb;
+ub = PB.ub;
 
-PB = McGillClass_problem_definition(2);
-output = NoHiSolver(PB,NoHi_options);
-output
+% Compute the objective:
+% (This calls the analysis function defined by the user in "PB.analysis_file")
+[f,y,constraints] = PB.analysis_handle(j,x_D,PB);
 
-PB = McGillClass_problem_definition(3);
-output = NoHiSolver(PB,NoHi_options);
-output
+% Affect Design and Coupling variables in x
+x(D) = x_D;
+if ~isempty(y)
+    x(C) = y;
+end
+
+%Penality if coupling variables are outside their bounds.
+if NoHi_options.constraints_cv
+    constraints = [ constraints , x(C)-ub(C) , lb(C)-x(C) ];
+end
+
+% Realistic objective
+if NoHi_options.realistic_obj && j==PB.index_main
+    constraints = [constraints , f-PB.frealistic];
+end
+
+% Check for nan, inf and imaginary values
+if any(isnan(x)) || any(imag(x))
+    f = +inf;
+end
+
+% Compute inconsistency
+q = get_q(PB,x)+delta_q;
+% Compute the consistency penalty:
+% Multiply by Lagrange multipliers
+phi = v.*q + w.*w.*q.*q;
+% Sum on the relevant components of q
+% (Note: it is possible to sum on all the components of pen
+% but this perturbate the convergence when some values
+% of pen are very large.)
+phi = sum(phi(PB.Q_indexes{j}));
+
+if isnan(phi) || imag(phi)
+    phi = +inf;
+end
+fphi_c = [f+phi constraints];
+
+% Concatenate the non penalized objective at the end of y
+% This allows to access the value via the "collect_y" option
+% of simple mads.
+y(end+1) = f;
