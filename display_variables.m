@@ -3,9 +3,9 @@
 %                                                                                     %
 %  A solver for Multi-Disciplinary Optimization, based on Non-Hierarchical Analytical %
 %  Target Cascading                                                                   %
-%  Version 2.0.1                                                                      %
+%  Version 3.0.0                                                                      %
 %                                                                                     %
-%  Copyright (C) 2012-2016  Bastien Talgorn - McGill University, Montreal             %
+%  Copyright (C) 2012-2019  Bastien Talgorn - McGill University, Montreal             %
 %                                                                                     %
 %  Author: Bastien Talgorn                                                            %
 %  email: bastientalgorn@fastmail.com                                                 %
@@ -25,63 +25,60 @@
 %  You can find information on NoHiMDO at https://github.com/bastientalgorn/NoHiMDO   %
 %-------------------------------------------------------------------------------------%
 
-function display_variables(PB)
+function display_variables(PB,x)
 
-disp('================ Summary of variables =========');
-for i1 = 1:PB.NV
-    
-    % Variable index
-    disp(['Variable #' num2str(i1)]);
+NV = PB.NV;
+NX = PB.NX;
+NQ = PB.NQ;
+NSP = PB.NSP;
 
-    % Name
-    disp(['  Name:        ' PB.varnames{i1}]);
-    
-    % Subproblem index
-    dummy_str = '';
-    if PB.dummy(i1)
-        dummy_str = ' (dummy variable)';
+% Display variable names of coupled variables
+disp('Components of X:');
+for i1=1:PB.NX
+    s = ['x(' num2str(i1) ') = ' PB.x_names{i1}];
+    if any(PB.link_matrix(i1,:))
+        s = [s ' <---> { '];
+        for i2=1:NX
+            if PB.link_matrix(i1,i2)
+                s = [s PB.x_names{i2} ', '];
+            end
+        end
+        s = s(1:end-2);
+        s = [s ' }'];
     end
-    disp(['  Subproblem:  ' num2str(PB.SP_index(i1)) dummy_str]);
-    
-    % Coupling variable?
-    if PB.cv(i1)
-        disp('  Coupl. var.: yes');
-    else
-        disp('  Coupl. var.: no');
+    s = ['  ' s];
+    disp(s);
+end
+
+disp('Variables:');
+for i1=1:NV
+
+    ximin = min(PB.var_index_to_x_indexes{i1});
+    ximax = max(PB.var_index_to_x_indexes{i1});
+    s = ['x(' num2str(ximin)];
+
+    if ximin~=ximax
+        s = [s ':' num2str(ximax)];
     end
-    
-    % Links
-    s = '  Linked to:  ';
-    if isempty(PB.links{i1})
-        s = [s ' nothing'];
-    else
-        for i2=PB.links{i1}
-            s = [s ' ' PB.varnames{i2}];
+    s = ['  ' s ') = ' PB.var_names{i1} ' = [ ' num2str(x(ximin:ximax)) ' ]'];
+    disp(s);
+end
+   
+% Display variable names of coupled variables
+q = get_q(PB,x);
+disp('Links:');
+for k=1:PB.NQ
+    i1 = PB.L(1,k);
+    i2 = PB.L(2,k);
+    s = ['q(' num2str(k) ') = ' PB.x_names{i1} ' - ' PB.x_names{i2} ' = ' num2str(q(k)) ' (SubPb. '];
+    for j=1:NSP
+        if ismember(k,PB.Q_indexes{j})
+            s = [s num2str(j) ', '];
         end
     end
-    disp(s);
-    
-    % Dimension
-    disp(['  Dimension:   ' num2str(PB.dim(i1))]);
-    
-    % Bounds
-    disp(['  Lower bound: ' v2str(PB.lb(PB.X_indexes{i1}))]);
-    disp(['  Upper bound: ' v2str(PB.ub(PB.X_indexes{i1}))]);
-    
-    % Final value (if available)
-    if isfield(PB,'xfinal')
-        disp(['  Solution:    ' v2str(PB.xfinal(PB.X_indexes{i1}))]);    
-    end
+    s = s(1:end-2);
+    s = ['  ' s '}'];
+    disp(s)
 end
 
 
-
-function s = v2str(v)
-if length(v)==1
-    s = num2str(v,9);
-elseif min(size(v))>1
-    error('Not a vector');
-else
-    s = [ '[ ' num2str(v(:)',9) ' ]' ];
-end
-    

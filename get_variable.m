@@ -3,9 +3,9 @@
 %                                                                                     %
 %  A solver for Multi-Disciplinary Optimization, based on Non-Hierarchical Analytical %
 %  Target Cascading                                                                   %
-%  Version 2.0.1                                                                      %
+%  Version 3.0.0                                                                      %
 %                                                                                     %
-%  Copyright (C) 2012-2016  Bastien Talgorn - McGill University, Montreal             %
+%  Copyright (C) 2012-2019  Bastien Talgorn - McGill University, Montreal             %
 %                                                                                     %
 %  Author: Bastien Talgorn                                                            %
 %  email: bastientalgorn@fastmail.com                                                 %
@@ -25,12 +25,11 @@
 %  You can find information on NoHiMDO at https://github.com/bastientalgorn/NoHiMDO   %
 %-------------------------------------------------------------------------------------%
 
-function varargout = get_variable(x_DV,PB,varargin)
+function varargout = get_variable(x_D,PB,varargin)
 N = length(varargin);
-varargout = cell(1,N);
+varargout = cell(N,1);
 for k=1:N
     i = name2varindex(varargin{k},PB);
-    varargout{k} = x_DV(PB.XDV_indexes{i});
+    varargout{k} = x_D(PB.XDV_indexes{i});
 end
-    
 

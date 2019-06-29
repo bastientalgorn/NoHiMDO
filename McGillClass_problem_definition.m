@@ -20,7 +20,7 @@ ub = 10;
 
 %            Name     SP      CV      links    dim    lb     ub
 PB.var{1} = {'fu_1'   1    false      'fu_3'    1     lb     ub};
-PB.var{2} = {'fa_1'   1    false      'fa_2'    1     lb     ub};
+PB.var{2} = {'fa_1'   1    false      'auto'    1     lb     ub};
 %----------------------------------------------------------
 PB.var{3}  = {'a'     2    false         []     1     lb     ub};
 PB.var{4}  = {'b'     2    false         []     1     lb     ub};

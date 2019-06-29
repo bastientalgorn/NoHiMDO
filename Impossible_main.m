@@ -27,25 +27,18 @@
 
 close all
 clear all
-disp('======= Solving the 3 problems for McGill Class ===============');
 
 % NiHiMDO Parameters
 NoHi_options.display = true;
-NoHi_options.cache = false;
 NoHi_options.w_scheme = 'median';
-NoHi_options.beta = 1.5;
-NoHi_options.NI = 30;
-NoHi_options.NO = 30;
-NoHi_options.save_subproblems = true;
+NoHi_options.beta = 1.3;
+NoHi_options.w0 = 1;
+NoHi_options.inc_stop = 1e-9;
+NoHi_options.NI = 1000;
+NoHi_options.NO = 100;
+NoHi_options.nb_proc = 1;
+NoHi_options.psize = 'last';
 
-PB = McGillClass_problem_definition(1);
-output = NoHiSolver(PB,NoHi_options);
-output
-
-PB = McGillClass_problem_definition(2);
-output = NoHiSolver(PB,NoHi_options);
-output
-
-PB = McGillClass_problem_definition(3);
+PB = Impossible_problem_definition;
 output = NoHiSolver(PB,NoHi_options);
 output

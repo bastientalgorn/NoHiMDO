@@ -3,9 +3,9 @@
 %                                                                                     %
 %  A solver for Multi-Disciplinary Optimization, based on Non-Hierarchical Analytical %
 %  Target Cascading                                                                   %
-%  Version 2.0.1                                                                      %
+%  Version 3.0.0                                                                      %
 %                                                                                     %
-%  Copyright (C) 2012-2016  Bastien Talgorn - McGill University, Montreal             %
+%  Copyright (C) 2012-2019  Bastien Talgorn - McGill University, Montreal             %
 %                                                                                     %
 %  Author: Bastien Talgorn                                                            %
 %  email: bastientalgorn@fastmail.com                                                 %
@@ -51,5 +51,6 @@ NoHi_options.psize = 'last';
 
 
 % Run
-[inc,obj,x] = NoHiSolver(PB,NoHi_options);
+output = NoHiSolver(PB,NoHi_options);
+output
 

@@ -24,28 +24,45 @@
 %                                                                                     %
 %  You can find information on NoHiMDO at https://github.com/bastientalgorn/NoHiMDO   %
 %-------------------------------------------------------------------------------------%
+function L = get_automatic_links(i1,PB)
+% Here, we automatically match 2 variables names if, when removing the trailing digits, the 
+% 2 strings are identical and not empty.
+% Example: "a_1" and "a_2" both give "a_" when removing trailing digits. That's a match.
 
-close all
-clear all
-disp('======= Solving the 3 problems for McGill Class ===============');
+% Links:
+L = cell(0,0);
 
-% NiHiMDO Parameters
-NoHi_options.display = true;
-NoHi_options.cache = false;
-NoHi_options.w_scheme = 'median';
-NoHi_options.beta = 1.5;
-NoHi_options.NI = 30;
-NoHi_options.NO = 30;
-NoHi_options.save_subproblems = true;
+% Name of variable i1, without trailing spaces
+s1 = remove_trailing_digits( PB.var_names{i1} );
 
-PB = McGillClass_problem_definition(1);
-output = NoHiSolver(PB,NoHi_options);
-output
+% If s1 is empty, 
+if isempty(s1)
+    error(['Variable ' PB.var_names{i1} ' is empty after removing trailing digits']);
+end
 
-PB = McGillClass_problem_definition(2);
-output = NoHiSolver(PB,NoHi_options);
-output
+% Loop over all variables except i1
+disp(['Variable ' PB.var_names{i1} ' is automatically linked with:']);
+k = 1;
+for i=1:PB.NV
+    if (i==i1)
+        continue;
+    end
+    si = remove_trailing_digits( PB.var_names{i} );
+    if strcmp(s1,si)
+        % Store link
+        L{k} = i;
+        k = k+1;
+        % Display name
+        disp(['    ' PB.var_names{i}]); 
+    end 
+end
 
-PB = McGillClass_problem_definition(3);
-output = NoHiSolver(PB,NoHi_options);
-output
+if isempty(L)
+    disp(['    Nothing...']);
+end
+
+% Display auto links:
+function s = remove_trailing_digits(s)
+while length(s) && isstrprop(s(end),'digit')
+    s(end) = [];
+end
